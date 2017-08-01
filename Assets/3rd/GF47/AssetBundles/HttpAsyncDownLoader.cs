@@ -113,7 +113,7 @@ namespace Assets
                 if (state.downLoadFinishedCallback != null) { state.downLoadFinishedCallback(true); }
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 state.Dispose();
                 FileInfo info = new FileInfo(state.nativePath);
@@ -122,7 +122,8 @@ namespace Assets
                     info.Delete();
                 }
                 if (state.downLoadFinishedCallback != null) { state.downLoadFinishedCallback(false); }
-                throw;
+
+                UnityEngine.Debug.LogError(e);
             }
         }
     }

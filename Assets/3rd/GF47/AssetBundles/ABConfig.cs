@@ -4,22 +4,6 @@ namespace Assets
 {
     public static class ABConfig
     {
-        public const string KEY_SERVER = "Server";
-        public const string SERVER_URL = "http://172.16.33.112:8088";
-
-        public const string KEY_VERSION = "Version";
-        public const int VERSION = 1;
-
-        public const string KEY_ASSETBUNDLES = "AssetBundles";
-        public const string KEY_ASSETS = "Assets";
-
-        /// <summary>
-        /// 资源清单文件
-        /// </summary>
-        public const string NAME_ASSETSMAP = "AssetsMap.json";
-#if UNITY_EDITOR
-        public const string LOCAL_PATH = "E:/GF47_Work/Projects/K12/TestAssetBundles";
-#endif
 
         /// <summary>
         /// 运行平台
@@ -32,10 +16,29 @@ namespace Assets
 #else
             "";
 #endif
+
+        public const string KEY_SERVER = "Server";
+        public const string SERVER_URL = "http://172.16.33.112:8088";
+
+        public const string KEY_VERSION = "Version";
+        public const int VERSION = 1;
+
+        public const string KEY_MANIFEST = "Manifest";
         /// <summary>
         /// Manifest文件AB包名，这里通常与平台名相同
         /// </summary>
         public const string MANIFEST_NAME = PLATFORM;
+
+        public const string KEY_ASSETBUNDLES = "AssetBundles";
+        public const string KEY_ASSETS = "Assets";
+
+        /// <summary>
+        /// 资源清单文件
+        /// </summary>
+        public const string NAME_ASSETSMAP = "AssetsMap.json";
+#if UNITY_EDITOR
+        public const string LOCAL_PATH = "E:/GF47_Work/Projects/K12/TestAssetBundles";
+#endif
 
         /// <summary>
         /// StreamingAssetPath的同步读取方式，使用AssetBundle.LoadfromFile加载
@@ -73,6 +76,7 @@ namespace Assets
             Application.persistentDataPath;
 #elif UNITY_ANDROID
             Application.persistentDataPath;
+
 #else
             Application.persistentDataPath;
 #endif

@@ -1,0 +1,33 @@
+ManifestFileVersion: 0
+CRC: 1904837921
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: fffc4a66b5bdc6a7cceb8a0327be34a6
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: d4e22bca998c188582dba61b6c905222
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+Assets:
+- Assets/~Temp/@Meshes/Materials/box.mat
+- Assets/~Temp/@Meshes/box/box.FBX
+- Assets/~Temp/@Meshes/tea_pot/tea_pot.FBX
+Dependencies:
+- E:/GF47_Work/Projects/K12/TestUnityFramework/AssetBundles/Android/~temp/textures/hua_ji_jpg_fcab4

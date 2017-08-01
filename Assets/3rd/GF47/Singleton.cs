@@ -1,7 +1,7 @@
 ﻿/***************************************************************
  * @File Name       : MonoSingleton
  * @Author          : GF47
- * @Description     : 单例
+ * @Description     : 单例，然而单例还特么的要继承，我也是醉了……
  * @Date            : 2017/7/17/星期一 11:51:07
  * @Edit            : none
  **************************************************************/
@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace GF47RunTime
 {
-    public class Singleton<T> where T : Singleton<T>
+    public class Singleton<T> where T : Singleton<T>, new()
     {
         public static T Instance
         {
@@ -30,7 +30,7 @@ namespace GF47RunTime
         }
         protected static T instance;
 
-        public static Func<T> ConstructFunc;
+        public static Func<T> ConstructFunc = () => new T();
     }
 
     public class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>

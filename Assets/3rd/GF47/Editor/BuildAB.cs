@@ -15,9 +15,11 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Assets;
+using GF47RunTime;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -165,7 +167,7 @@ public class BuildAB
         }
 
         string outputPath = CreateABDirectory(Platform.Android, Application.dataPath.Substring(0, Application.dataPath.Length - 7) + "/" + ASSETBUNDLES_ROOT_DIRECTORY);
-        BuildPipeline.BuildAssetBundles(outputPath, abBuilds, BuildAssetBundleOptions.None, BuildTarget.Android);
+        BuildPipeline.BuildAssetBundles(outputPath, abBuilds, BuildAssetBundleOptions.DeterministicAssetBundle, BuildTarget.Android);
         AssetDatabase.Refresh();
 
         CopyAssetsMapFileTo(outputPath);
@@ -189,7 +191,7 @@ public class BuildAB
         }
 
         string outputPath = CreateABDirectory(Platform.Windows, Application.dataPath.Substring(0, Application.dataPath.Length - 7) + "/" + ASSETBUNDLES_ROOT_DIRECTORY);
-        BuildPipeline.BuildAssetBundles(outputPath, abBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        BuildPipeline.BuildAssetBundles(outputPath, abBuilds, BuildAssetBundleOptions.DeterministicAssetBundle, BuildTarget.StandaloneWindows);
         AssetDatabase.Refresh();
 
         CopyAssetsMapFileTo(outputPath);
@@ -238,17 +240,32 @@ public class BuildAB
         return exportDirectory;
     }
 
-    [MenuItem("AssetBundles/Create Assets Map")]
-    private static string CreateAssetsMap()
+    // [MenuItem("AssetBundles/Create Assets Map")]
+    private static string CreateAssetsMap(string outputPath)
     {
         AssetDatabase.RemoveUnusedAssetBundleNames();
 
-        string[] assetBundleNames = AssetDatabase.GetAllAssetBundleNames();
+        string manifestPath = outputPath + "/" + ABConfig.MANIFEST_NAME;
+        string manifestMD5 = string.Empty;
+        if (File.Exists(manifestPath))
+        {
+            manifestMD5 = FileUtility.GetFileHash(manifestPath);
+        }
+        JSONObject jsonManifest = new JSONObject();
+        jsonManifest.Add(ABConfig.MANIFEST_NAME, manifestMD5);
 
+        string[] assetBundleNames = AssetDatabase.GetAllAssetBundleNames();
         JSONObject jsonAssetBundleNames = new JSONObject();
         for (int i = 0; i < assetBundleNames.Length; i++)
         {
-            jsonAssetBundleNames.Add(assetBundleNames[i], i);
+            string abPath = outputPath + "/" + assetBundleNames[i];
+            string abMD5 = string.Empty;
+            if (File.Exists(abPath))
+            {
+                abMD5 = FileUtility.GetFileHash(abPath);
+            }
+
+            jsonAssetBundleNames.Add(assetBundleNames[i], abMD5);
         }
 
         JSONObject jsonAssets = new JSONObject();
@@ -265,6 +282,7 @@ public class BuildAB
         {
             {ABConfig.KEY_SERVER, ABConfig.SERVER_URL},
             {ABConfig.KEY_VERSION, ABConfig.VERSION},
+            {ABConfig.KEY_MANIFEST, jsonManifest},
             {ABConfig.KEY_ASSETBUNDLES, jsonAssetBundleNames},
             {ABConfig.KEY_ASSETS, jsonAssets}
         };
@@ -296,10 +314,11 @@ public class BuildAB
 
     private static void CopyAssetsMapFileTo(string outPutPath)
     {
-        string fileName = CreateAssetsMap();
+        string fileName = CreateAssetsMap(outPutPath);
         if (File.Exists(fileName))
         {
             File.Copy(fileName, outPutPath + "/" + ABConfig.NAME_ASSETSMAP, true);
         }
     }
+
 }

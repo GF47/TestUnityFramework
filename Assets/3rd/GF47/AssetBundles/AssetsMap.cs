@@ -11,8 +11,11 @@ namespace Assets
     {
         public string serverAddress;
         public int version;
-        public string[] assetbundles;
+        public KeyValuePair<string, string> manifest;
+        public KeyValuePair<string, string>[] assetbundles;
         public Dictionary<string, int> assets;
+
+        public bool IsStreamingAssets { get; private set; }
 
         public AssetsMap()
         {
@@ -24,13 +27,12 @@ namespace Assets
             }
             else
             {
+                IsStreamingAssets = true;
+
                 nativePath = ABConfig.AssetbundleRoot_Streaming_AsWWW + "/" + ABConfig.NAME_ASSETSMAP; // 读取StreamingAssets的jar包，是否有map文件
-                
-                Debug.Log(nativePath);
 
                 Coroutines.StartACoroutine(GetJson(nativePath));
             }
-
         }
 
         private IEnumerator GetJson( string nativePath)
@@ -49,14 +51,24 @@ namespace Assets
                 JSONObject assetsMap = JSON.Parse(jsonStr).AsObject;
                 serverAddress = assetsMap[ABConfig.KEY_SERVER];
                 version = assetsMap[ABConfig.KEY_VERSION];
+                JSONObject manifestJsonObject = assetsMap[ABConfig.KEY_MANIFEST].AsObject;
                 JSONObject assetBundleJsonObjects = assetsMap[ABConfig.KEY_ASSETBUNDLES].AsObject;
                 JSONObject assetJsonObjects = assetsMap[ABConfig.KEY_ASSETS].AsObject;
 
-                assetbundles = new string[assetBundleJsonObjects.Count];
+                foreach (KeyValuePair<string, JSONNode> pair in manifestJsonObject)
+                {
+                    manifest = new KeyValuePair<string, string>(pair.Key, pair.Value);
+                    break;
+                }
+
+                assetbundles = new KeyValuePair<string, string>[assetBundleJsonObjects.Count];
+                int index = 0;
                 foreach (KeyValuePair<string, JSONNode> pair in assetBundleJsonObjects)
                 {
-                    assetbundles[pair.Value] = pair.Key;
+                    assetbundles[index] = new KeyValuePair<string, string>(pair.Key, pair.Value);
+                    index++;
                 }
+
                 assets = new Dictionary<string, int>(assetJsonObjects.Count);
                 foreach (KeyValuePair<string, JSONNode> pair in assetJsonObjects)
                 {
