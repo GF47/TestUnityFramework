@@ -7,23 +7,32 @@ using SimpleJSON;
 
 namespace Assets
 {
-    public class AssetsMap : Singleton<AssetsMap>
+    public class AssetsMap  : CustomYieldInstruction
     {
+        public static AssetsMap Instance { get { return _instance; } }
+        private static AssetsMap _instance;
+
         public string serverAddress;
         public int version;
         public KeyValuePair<string, string> manifest;
         public KeyValuePair<string, string>[] assetbundles;
         public Dictionary<string, int> assets;
 
+        public override bool keepWaiting { get { return !_isDone; } }
+        private bool _isDone;
+
         public bool IsStreamingAssets { get; private set; }
 
         public AssetsMap()
         {
+            _instance = this;
+
             string nativePath = ABConfig.AssetbundleRoot_Hotfix + "/" + ABConfig.NAME_ASSETSMAP; // 首先读取persistentData文件夹，是否有map文件
 
             if (File.Exists(nativePath))
             {
                 ReadJson(File.ReadAllText(nativePath));
+                _isDone = true;
             }
             else
             {
@@ -42,6 +51,8 @@ namespace Assets
             ReadJson(www.text);
             www.Dispose();
             www = null;
+
+            _isDone = true;
         }
 
         private void ReadJson(string jsonStr)

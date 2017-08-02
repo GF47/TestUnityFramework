@@ -63,7 +63,8 @@ namespace Assets
 #elif UNITY_STANDALONE
              "file://" + Application.streamingAssetsPath;
 #elif UNITY_ANDROID
-            "jar:file://" + Application.streamingAssetsPath;
+             Application.streamingAssetsPath;
+            // "jar:file://" + Application.streamingAssetsPath;// 狗屎，网上说的都是要加jar，加个鸡毛
 #else
             "file://" + "Application.streamingAssetsPath";
 #endif

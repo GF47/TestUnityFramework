@@ -6,62 +6,126 @@
  * @Edit            : none
  **************************************************************/
 
-using System;
 using System.Collections.Generic;
 using GF47RunTime;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Assets
 {
     public class AssetBundlesManager : Singleton<AssetBundlesManager>
     {
-        private AssetBundlesUpdater _assetBundlesUpdater;
-        private bool _isUpdateDone;
-
         private AssetBundleManifest _manifest;
 
-        public void GetAssetsMapFromServer()
-        {
-            AssetsMap.ConstructFunc = () => new AssetsMap();
-            AssetsMapDownLoader downLoader = new AssetsMapDownLoader();
-        }
+        private List<ABItem> _assetBundles;
 
-        public void UpdateAssetBundles()
-        {
-            AssetBundlesUpdater updater = new AssetBundlesUpdater();
-        }
+        private List<ABItem> _assetBundlesTemp;
 
-        public int GetUpdateProgress()
+        public void Init()
         {
-            if (_isUpdateDone) { return 100; }
-            if (_assetBundlesUpdater == null) { return 0; }
-            return _assetBundlesUpdater.Progress;
-        }
-
-        public bool GetUpdateState()
-        {
-            if (_assetBundlesUpdater != null)
-            {
-                _isUpdateDone = _assetBundlesUpdater.IsDone;
-                if (_isUpdateDone)
-                {
-                    _assetBundlesUpdater = null;
-                }
-            }
-            return _isUpdateDone;
+            _assetBundles = new List<ABItem>();
+            _assetBundlesTemp = new List<ABItem>();
+            GetManifest();
         }
 
         public void GetManifest()
         {
-            Debug.Log(AssetsMap.instance.manifest.Key);
-            string abPath = (AssetsMap.instance.IsStreamingAssets
+            // Debug.Log(AssetsMap.Instance.manifest.Key);
+            string abPath = (AssetsMap.Instance.IsStreamingAssets
                 ? ABConfig.AssetbundleRoot_Streaming_AsFile
                 : ABConfig.AssetbundleRoot_Hotfix)
-                + "/" + AssetsMap.instance.manifest.Key;
+                + "/" + AssetsMap.Instance.manifest.Key;
             AssetBundle ab = AssetBundle.LoadFromFile(abPath);
-            _manifest = ab.LoadAsset<AssetBundleManifest>(ABConfig.MANIFEST_NAME);
+            _manifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            Assert.IsNotNull(_manifest);
             ab.Unload(false);
+        }
+
+        public ABItem BeginLoadABContain(string assetName)
+        {
+            _assetBundlesTemp.Clear();
+
+            string abName = GetABNameByAssetName(assetName);
+
+            ABItem item = LoadABAndDependencies(abName);
+
+            for (int i = 0; i < _assetBundlesTemp.Count; i++)
+            {
+                _assetBundlesTemp[i].referenceCount++;
+            }
+
+            return item;
+        }
+
+        /// <summary>
+        /// 卸载ab包
+        /// </summary>
+        /// <param name="resident">是否常驻内存</param>
+        public void EndLoad(bool resident)
+        {
+            if (!resident)
+            {
+                for (int i = 0; i < _assetBundlesTemp.Count; i++)
+                {
+                    _assetBundlesTemp[i].referenceCount--;
+                }
+            }
+            UnloadTemp(false);
+            _assetBundlesTemp.Clear();
+        }
+
+        private void UnloadTemp(bool force)
+        {
+            for (int i = 0; i < _assetBundlesTemp.Count; i++)
+            {
+                ABItem item = _assetBundlesTemp[i];
+                if (item.referenceCount < 1)
+                {
+                    item.ab.Unload(force);
+                }
+            }
+            _assetBundles.RemoveAll(abItem => abItem.referenceCount < 1);
+        }
+
+        public void ReleaseAllAB(bool force)
+        {
+            for (int i = 0; i < _assetBundles.Count; i++)
+            {
+                ABItem item = _assetBundles[i];
+                if (item.referenceCount < 1)
+                {
+                    item.ab.Unload(force);
+                }
+            }
+            _assetBundles.RemoveAll(abItem => abItem.referenceCount < 1);
+        }
+
+        private ABItem LoadABAndDependencies(string abName)
+        {
+            ABItem item = _assetBundles.Find(abItem => abItem.path == abName);
+            if (item == null)
+            {
+                item = new ABItem(abName);
+                _assetBundles.Add(item);
+            }
+
+            Assert.IsNotNull(_manifest);
+            string[] dependencies = _manifest.GetDirectDependencies(abName);
+            foreach (var dependency in dependencies)
+            {
+                LoadABAndDependencies(dependency);
+            }
+            _assetBundlesTemp.Add(item);
+            return item;
+        }
+
+        public static string GetABNameByAssetName(string assetName)
+        {
+            AssetsMap map = AssetsMap.Instance;
+            if (!map.assets.ContainsKey(assetName)) { return null; }
+            int abID = map.assets[assetName];
+            KeyValuePair<string, string> abPair = map.assetbundles[abID];
+            return abPair.Key;
         }
     }
 }

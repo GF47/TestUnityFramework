@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Diagnostics.SymbolStore;
 using System.IO;
+using UnityEngine;
 
 namespace Assets
 {
-    public class AssetsMapDownLoader
+    public class AssetsMapDownLoader : CustomYieldInstruction
     {
         public int Progress { get { return _downLoader.percent; } }
-        public bool IsDone { get; private set; }
+        public override bool keepWaiting { get { return !_isDone; } }
+        private bool _isDone;
 
         private HttpAsyncDownLoader _downLoader;
         private int _retryNumber;
 
-        private string _url;
-        private string _nativePath;
+        private readonly string _url;
+        private readonly string _nativePath;
 
         public AssetsMapDownLoader()
         {
@@ -29,30 +30,31 @@ namespace Assets
             {
                 File.Delete(_nativePath);
             }
-            _downLoader = new HttpAsyncDownLoader(_url, _nativePath, Callback);
+            _downLoader = new HttpAsyncDownLoader(_url, _nativePath, ErrorCallback, DownLoadFinishedCallback);
             _downLoader.Start();
         }
 
-        private void Callback(bool b)
+        private void ErrorCallback(Exception e)
         {
-            IsDone = b;
-            if (!IsDone)
+            if (_retryNumber < 2)
             {
                 _retryNumber++;
-                if (_retryNumber < 2)
+                Start();
+            }
+            else
+            {
+                _isDone = true;
+                if (File.Exists(_nativePath))
                 {
-                    Start();
-                }
-                else
-                {
-                    IsDone = true;
-                    if (File.Exists(_nativePath))
-                    {
-                        File.Delete(_nativePath);
-                    }
-                    //throw new Exception(_nativePath + "下载失败");
+                    File.Delete(_nativePath);
                 }
             }
         }
+
+        private void DownLoadFinishedCallback(bool b)
+        {
+            _isDone = b;
+        }
+
     }
 }

@@ -1,7 +1,7 @@
 ﻿/***************************************************************
- * @File Name       : AssetBundleItem
+ * @File Name       : ABItem
  * @Author          : GF47
- * @Description     : TODO what's the use of the [AssetBundleItem]
+ * @Description     : TODO what's the use of the [ABItem]
  * @Date            : 2017/7/31/星期一 15:57:09
  * @Edit            : none
  **************************************************************/
@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Assets
 {
-    public class AssetBundleItem
+    public class ABItem
     {
         public string path;
         public AssetBundle ab;
@@ -24,7 +24,7 @@ namespace Assets
         /// </summary>
         /// <param name="path">包的路径，可能存在persistent文件夹中，也可能存在streaming文件夹中</param>
         /// <param name="isAsync">是否异步读取</param>
-        public AssetBundleItem(string path, bool isAsync = false)
+        public ABItem(string path, bool isAsync = false)
         {
             this.path = path;
 
@@ -50,10 +50,13 @@ namespace Assets
 
         public void Unload(bool force)
         {
-            if (referenceCount < 1)
+            if (force)
             {
-                ab.Unload(force);
+                ab.Unload(true);
+                return;
             }
+
+            if (referenceCount < 1) { ab.Unload(false); }
         }
     }
 }

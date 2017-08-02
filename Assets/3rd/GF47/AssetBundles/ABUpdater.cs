@@ -1,25 +1,30 @@
 ﻿/***************************************************************
- * @File Name       : AssetBundlesUpdater
+ * @File Name       : ABUpdater
  * @Author          : GF47
- * @Description     : TODO what's the use of the [AssetBundlesUpdater]
+ * @Description     : TODO what's the use of the [ABUpdater]
  * @Date            : 2017/8/1/星期二 11:11:10
  * @Edit            : none
  **************************************************************/
 
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using GF47RunTime;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Assets
 {
-    public class AssetBundlesUpdater
+    public class ABUpdater : CustomYieldInstruction
     {
         public int Progress
         {
             get
             {
+                if (_isUpdateFinished) { return 100; }
+
+                if (_downLoaders == null) { return 0; }
+
                 int value = 0;
                 for (int i = 0; i < _downLoaders.Count; i++)
                 {
@@ -29,30 +34,45 @@ namespace Assets
                 return value;
             }
         }
-
-        public bool IsDone
+        public override bool keepWaiting
         {
             get
             {
+                if (_isUpdateFinished) { return false; }
+                if (_downLoaders == null) { return true; }
                 for (int i = 0; i < _downLoaders.Count; i++)
                 {
-                    if (!_downLoaders[i].IsDone) { return false; }
+                    if (_downLoaders[i].keepWaiting) { return true; }
                 }
-                return true;
+                return false;
             }
 
         }
 
-        private List<AssetBundleDownLoader> _downLoaders;
+        private bool _isUpdateFinished;
+
+        private List<ABDownLoader> _downLoaders;
 
 
-        public AssetBundlesUpdater()
+        public void Init()
         {
-            if (AssetsMap.Instance.IsStreamingAssets) { return; }
+            Coroutines.StartACoroutine(__Init());
+        }
+
+        private IEnumerator __Init()
+        {
+            yield return new AssetsMapDownLoader();
+            yield return new AssetsMap();
+
+            if (AssetsMap.Instance.IsStreamingAssets)
+            {
+                _isUpdateFinished = true;
+                yield break;
+            }
 
             KeyValuePair<string, string>[] abArray = AssetsMap.Instance.assetbundles;
 
-            _downLoaders  = new List<AssetBundleDownLoader>(abArray.Length + 1);
+            _downLoaders  = new List<ABDownLoader>(abArray.Length + 1);
 
             CheckIfShouldUpdate(AssetsMap.Instance.manifest.Key, AssetsMap.Instance.manifest.Value);
 
@@ -60,6 +80,11 @@ namespace Assets
             {
                 CheckIfShouldUpdate(abArray[i].Key, abArray[i].Value);
             }
+
+            yield return this;
+            Assert.IsFalse(keepWaiting);
+
+            _isUpdateFinished = true;
         }
 
         private void CheckIfShouldUpdate(string abName, string md5)
@@ -74,8 +99,9 @@ namespace Assets
             }
             if (shouldUpdate)
             {
-                _downLoaders.Add(new AssetBundleDownLoader(abName));
+                _downLoaders.Add(new ABDownLoader(abName));
             }
         }
+
     }
 }

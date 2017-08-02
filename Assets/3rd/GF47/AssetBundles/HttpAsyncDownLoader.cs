@@ -1,11 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using UnityEngine;
 
 namespace Assets
 {
     public class HttpAsyncDownLoader : IDisposable
     {
+        public enum State
+        {
+            DownLoading,
+            Completed,
+            Failed,
+        }
+
         private const int TIME_OUT_THRESHOLD = 20000;
         private const int READ_WRITE_TIME_OUT_THRESHOLD = 10000;
         private const int BUFFER_SIZE = 1024;
@@ -17,6 +25,7 @@ namespace Assets
         public string nativePath;
         public int percent;
 
+        public Action<Exception> errorCallback;
         public Action<bool> downLoadFinishedCallback;
 
         private HttpWebRequest _request;
@@ -25,11 +34,14 @@ namespace Assets
         private long _startPos;
         private FileStream _fileStream;
 
-        public HttpAsyncDownLoader(string url, string nativePath, Action<bool> callback = null)
+        public HttpAsyncDownLoader(string url, string nativePath, Action<Exception> errorCallback = null, Action<bool> downLoadFinishedCallback = null)
         {
             this.url = url;
             this.nativePath = nativePath;
-            this.downLoadFinishedCallback = callback;
+            this.errorCallback = errorCallback;
+            this.downLoadFinishedCallback = downLoadFinishedCallback;
+            
+            //System.Net.ServicePointManager.DefaultConnectionLimit
         }
 
         public void Start()
@@ -73,9 +85,9 @@ namespace Assets
 
         public void Dispose()
         {
-            if (_fileStream != null) _fileStream.Close(); _fileStream = null;
-            if (_response != null) _response.Close(); _response = null;
-            if (_request != null) _request.Abort(); _request = null;
+            if (_fileStream != null) { _fileStream.Close(); _fileStream = null; }
+            if (_response != null) { _response.Close(); _response = null; }
+            if (_request != null) { _request.Abort(); _request = null; }
         }
 
         private static void DownLoadFinishedCallback(IAsyncResult ar)
@@ -122,8 +134,7 @@ namespace Assets
                     info.Delete();
                 }
                 if (state.downLoadFinishedCallback != null) { state.downLoadFinishedCallback(false); }
-
-                UnityEngine.Debug.LogError(e);
+                if (state.errorCallback != null) { state.errorCallback(e); }
             }
         }
     }

@@ -1,50 +1,57 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Assets;
+using GF47RunTime;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
-public class Test : MonoBehaviour {
+public class Test : MonoBehaviour
+{
 
-    void Awake()
+    void Start()
     {
         AssetBundlesManager.ConstructFunc = () => new AssetBundlesManager();
+        _abUpdater = new ABUpdater();
+        _abUpdater.Init();
     }
 
-	// Use this for initialization
-	void Start () {
-    }
+    private ABUpdater _abUpdater;
+
 
     // Update is called once per frame
-    void Update () {
-        if (Input.GetKeyUp(KeyCode.Space))
+    void Update()
+    {
+        if (!_abUpdater.keepWaiting)
         {
-            AssetBundlesManager.Instance.GetAssetsMapFromServer();
+            try
+            {
+
+                AssetBundlesManager.Instance.Init();
+
+                string assetName = "Assets/~Temp/Prefabs/tea_pot.prefab";
+                ABItem item = AssetBundlesManager.Instance.BeginLoadABContain(assetName);
+                GameObject go = item.ab.LoadAsset<GameObject>(assetName);
+                Object.Instantiate(go, Vector3.zero, Quaternion.identity);
+                AssetBundlesManager.Instance.EndLoad(true);
+
+                assetName = "Assets/~Temp/Prefabs/box.prefab";
+                item = AssetBundlesManager.Instance.BeginLoadABContain(assetName);
+                go = item.ab.LoadAsset<GameObject>(assetName);
+                Object.Instantiate(go, -Vector3.one, Quaternion.identity);
+                AssetBundlesManager.Instance.EndLoad(true);
+
+                assetName = "Assets/~Temp/Prefabs/@Sphere.prefab";
+                item = AssetBundlesManager.Instance.BeginLoadABContain(assetName);
+                go = item.ab.LoadAsset<GameObject>(assetName);
+                Object.Instantiate(go, Vector3.one, Quaternion.identity);
+                AssetBundlesManager.Instance.EndLoad(false);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+            Destroy(this);
         }
-        if (Input.GetKeyUp(KeyCode.A))
-        {
-            AssetBundlesManager.Instance.UpdateAssetBundles();
-        }
-
-        if (Input.GetKeyUp(KeyCode.B))
-        {
-            AssetBundlesManager.Instance.GetManifest();
-        }
-
-        Debug.Log(AssetBundlesManager.Instance.GetUpdateProgress() + AssetBundlesManager.Instance.GetUpdateState().ToString());
-
-        if (Input.GetKeyUp(KeyCode.C))
-        {
-            int abID = AssetsMap.Instance.assets["Assets/~Temp/Prefabs/tea_pot.prefab"];
-            string abName = AssetsMap.Instance.assetbundles[abID].Key;
-
-            string path = AssetsMap.Instance.IsStreamingAssets
-                ? ABConfig.AssetbundleRoot_Streaming_AsFile
-                : ABConfig.AssetbundleRoot_Hotfix;
-
-            AssetBundle ab = AssetBundle.LoadFromFile(path + "/" + abName);
-            GameObject go = ab.LoadAsset<GameObject>("Assets/~Temp/Prefabs/tea_pot.prefab");
-            Object.Instantiate(go, Vector3.zero, Quaternion.identity);
-            ab.Unload(false);
-        }
-	}
+    }
 }

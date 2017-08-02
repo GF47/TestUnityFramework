@@ -1,0 +1,31 @@
+ManifestFileVersion: 0
+CRC: 426419535
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: ~temp/textures/hua_ji_1_jpg_adba1
+      Dependencies: {}
+    Info_1:
+      Name: ~temp/textures/hua_ji_jpg_fcab4
+      Dependencies: {}
+    Info_2:
+      Name: ~temp/materials/hua_ji_mat_039be
+      Dependencies:
+        Dependency_0: ~temp/textures/hua_ji_1_jpg_adba1
+        Dependency_1: ~temp/textures/hua_ji_jpg_fcab4
+    Info_3:
+      Name: ~temp/prefabs/@sphere_prefab_0fd0e
+      Dependencies:
+        Dependency_0: ~temp/materials/hua_ji_mat_039be
+    Info_4:
+      Name: ~temp/prefabs/tea_pot_prefab_34240
+      Dependencies:
+        Dependency_0: ~temp/@meshes_672e9
+    Info_5:
+      Name: ~temp/prefabs/box_prefab_563a3
+      Dependencies:
+        Dependency_0: ~temp/@meshes_672e9
+    Info_6:
+      Name: ~temp/@meshes_672e9
+      Dependencies:
+        Dependency_0: ~temp/textures/hua_ji_jpg_fcab4
