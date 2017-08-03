@@ -170,9 +170,9 @@ public class BuildAB
         for (int i = 0; i < abBuilds.Length; i++)
         {
             AssetBundleBuild build = new AssetBundleBuild();
-            build.assetBundleName = string.Format("{0}.{1}", assetbundleNames[i], AB_FILE_EXTENSION);
-            build.assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(build.assetBundleName);
+            build.assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(assetbundleNames[i]);
             build.assetBundleVariant = string.Empty; // TODO 添加LOD时会需要，或者根据机型性能区分
+            build.assetBundleName = string.Format("{0}.{1}", assetbundleNames[i], AB_FILE_EXTENSION);
 
             abBuilds[i] = build;
         }
@@ -232,7 +232,7 @@ public class BuildAB
     {
         AssetDatabase.RemoveUnusedAssetBundleNames();
 
-        string manifestPath = outputPath + "/" + ABConfig.MANIFEST_NAME;
+        string manifestPath = string.Format("{0}/{1}", outputPath, ABConfig.MANIFEST_NAME); // manifest文件自动生成的，没有后缀名
         string manifestMD5 = string.Empty;
         if (File.Exists(manifestPath))
         {
@@ -252,7 +252,7 @@ public class BuildAB
                 abMD5 = FileUtility.GetFileHash(abPath);
             }
 
-            jsonAssetBundleNames.Add(assetBundleNames[i], abMD5);
+            jsonAssetBundleNames.Add(string.Format("{0}.{1}", assetBundleNames[i], AB_FILE_EXTENSION), abMD5);
         }
 
         JSONObject jsonAssets = new JSONObject();
