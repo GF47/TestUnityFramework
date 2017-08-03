@@ -27,6 +27,7 @@ using SimpleJSON;
 public class BuildAB
 {
     public const string CHAR_COLLECT_SUBASSETS_TO_SINGLE_ASSETBUNDLE = "@";
+    public const string AB_FILE_EXTENSION = "unity3d";
     public const int GUID_SUB_LENGTH = 5;
 
     public const string ASSETBUNDLES_ROOT_DIRECTORY = "AssetBundles";
@@ -151,29 +152,16 @@ public class BuildAB
     [MenuItem("AssetBundles/Build Android")]
     static void BuildAll_Android()
     {
-        Caching.CleanCache();
-
-        string[] assetbundleNames = AssetDatabase.GetAllAssetBundleNames();
-        AssetBundleBuild[] abBuilds = new AssetBundleBuild[assetbundleNames.Length];
-        for (int i = 0; i < abBuilds.Length; i++)
-        {
-            AssetBundleBuild build = new AssetBundleBuild();
-            build.assetBundleName = assetbundleNames[i];
-            build.assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(build.assetBundleName);
-            build.assetBundleVariant = string.Empty; // TODO 添加LOD时会需要，或者根据机型性能区分
-
-            abBuilds[i] = build;
-        }
-
-        string outputPath = CreateABDirectory(Platform.Android, Application.dataPath.Substring(0, Application.dataPath.Length - 7) + "/" + ASSETBUNDLES_ROOT_DIRECTORY);
-        BuildPipeline.BuildAssetBundles(outputPath, abBuilds, BuildAssetBundleOptions.DeterministicAssetBundle, BuildTarget.Android);
-        AssetDatabase.Refresh();
-
-        CopyAssetsMapFileTo(outputPath);
+        BuildAll(Platform.Android, BuildTarget.Android);
     }
 
     [MenuItem("AssetBundles/Build Windows")]
     static void BuildAll_Windows()
+    {
+        BuildAll(Platform.Windows, BuildTarget.StandaloneWindows);
+    }
+
+    private static void BuildAll(Platform platform, BuildTarget target)
     {
         Caching.CleanCache();
 
@@ -182,15 +170,15 @@ public class BuildAB
         for (int i = 0; i < abBuilds.Length; i++)
         {
             AssetBundleBuild build = new AssetBundleBuild();
-            build.assetBundleName = assetbundleNames[i];
+            build.assetBundleName = string.Format("{0}.{1}", assetbundleNames[i], AB_FILE_EXTENSION);
             build.assetNames = AssetDatabase.GetAssetPathsFromAssetBundle(build.assetBundleName);
             build.assetBundleVariant = string.Empty; // TODO 添加LOD时会需要，或者根据机型性能区分
 
             abBuilds[i] = build;
         }
 
-        string outputPath = CreateABDirectory(Platform.Windows, Application.dataPath.Substring(0, Application.dataPath.Length - 7) + "/" + ASSETBUNDLES_ROOT_DIRECTORY);
-        BuildPipeline.BuildAssetBundles(outputPath, abBuilds, BuildAssetBundleOptions.DeterministicAssetBundle, BuildTarget.StandaloneWindows);
+        string outputPath = CreateABDirectory(platform, Application.dataPath.Substring(0, Application.dataPath.Length - 7) + "/" + ASSETBUNDLES_ROOT_DIRECTORY);
+        BuildPipeline.BuildAssetBundles(outputPath, abBuilds, BuildAssetBundleOptions.DeterministicAssetBundle, target);
         AssetDatabase.Refresh();
 
         CopyAssetsMapFileTo(outputPath);
@@ -257,7 +245,7 @@ public class BuildAB
         JSONObject jsonAssetBundleNames = new JSONObject();
         for (int i = 0; i < assetBundleNames.Length; i++)
         {
-            string abPath = outputPath + "/" + assetBundleNames[i];
+            string abPath = string.Format("{0}/{1}.{2}", outputPath, assetBundleNames[i], AB_FILE_EXTENSION);
             string abMD5 = string.Empty;
             if (File.Exists(abPath))
             {
