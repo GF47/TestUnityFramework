@@ -10,9 +10,9 @@
 
     public Message(string name, object body, string type)
     {
-        m_name = name;
-        m_body = body;
-        m_type = type;
+        _name = name;
+        _body = body;
+        _type = type;
     }
 
     /// <summary>
@@ -22,8 +22,8 @@
     public override string ToString()
     {
         string msg = "Notification Name: " + Name;
-        msg += "\nBody:" + ((Body == null) ? "null" : Body.ToString());
-        msg += "\nType:" + ((Type == null) ? "null" : Type);
+        msg += "\nBody:" + (Body == null ? "null" : Body.ToString());
+        msg += "\nType:" + (Type == null ? "null" : Type);
         return msg;
     }
 
@@ -32,7 +32,7 @@
     /// </summary>
     public virtual string Name
     {
-        get { return m_name; }
+        get { return _name; }
     }
 
     /// <summary>
@@ -44,12 +44,12 @@
         get
         {
             // Setting and getting of reference types is atomic, no need to lock here
-            return m_body;
+            return _body;
         }
         set
         {
             // Setting and getting of reference types is atomic, no need to lock here
-            m_body = value;
+            _body = value;
         }
     }
 
@@ -62,28 +62,28 @@
         get
         {
             // Setting and getting of reference types is atomic, no need to lock here
-            return m_type;
+            return _type;
         }
         set
         {
             // Setting and getting of reference types is atomic, no need to lock here
-            m_type = value;
+            _type = value;
         }
     }
 
     /// <summary>
     /// The name of the notification instance 
     /// </summary>
-    private string m_name;
+    private readonly string _name;
 
     /// <summary>
     /// The type of the notification instance
     /// </summary>
-	private string m_type;
+	private string _type;
 
     /// <summary>
     /// The body of the notification instance
     /// </summary>
-	private object m_body;
+	private object _body;
 }
 

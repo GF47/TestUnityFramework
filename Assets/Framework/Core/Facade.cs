@@ -3,55 +3,55 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-/// <summary>
-/// 事件命令
-/// </summary>
-public class ControllerCommand : ICommand
-{
-    public virtual void Execute(IMessage message) { }
-}
-
 public class Facade
 {
-    protected IController m_controller;
-    static GameObject m_GameManager;
-    static Dictionary<string, object> m_Managers = new Dictionary<string, object>();
+    private static readonly Dictionary<string, object> Managers = new Dictionary<string, object>();
 
-    GameObject AppGameManager
+    private GameObject AppGameManager
     {
         get
         {
-            if (m_GameManager == null) { m_GameManager = GameObject.Find("GameManager"); }
-            if (m_GameManager == null) { m_GameManager = new GameObject("GameManager"); }
-            return m_GameManager;
+            if (_gameManager == null)
+            {
+                _gameManager = GameObject.Find("GameManager");
+                if (_gameManager == null) { _gameManager = new GameObject("GameManager"); }
+            }
+            return _gameManager;
         }
     }
+    private static GameObject _gameManager;
+
+    protected IController controller;
 
     public virtual void InitFramework()
     {
-        if (m_controller != null) return;
-        m_controller = Controller.Instance;
+        if (controller != null) return;
+        controller = Controller.Instance;
     }
 
     public virtual void RegisterCommand(string commandName, Type commandType)
     {
-        m_controller.RegisterCommand(commandName, commandType);
+        controller.RegisterCommand(commandName, commandType);
     }
 
     public virtual void RemoveCommand(string commandName)
     {
-        m_controller.RemoveCommand(commandName);
+        controller.RemoveCommand(commandName);
     }
 
     public virtual bool HasCommand(string commandName)
     {
-        return m_controller.HasCommand(commandName);
+        return controller.HasCommand(commandName);
     }
 
     public void RegisterMultiCommand(Type commandType, params string[] commandNames)
     {
-        int count = commandNames.Length;
-        for (int i = 0; i < count; i++)
+        RegisterCommandsList(commandType, commandNames);
+    }
+
+    public void RegisterCommandsList(Type commandType, IList<string> commandNames)
+    {
+        for (int i = 0; i < commandNames.Count; i++)
         {
             RegisterCommand(commandNames[i], commandType);
         }
@@ -59,8 +59,12 @@ public class Facade
 
     public void RemoveMultiCommand(params string[] commandName)
     {
-        int count = commandName.Length;
-        for (int i = 0; i < count; i++)
+        RemoveCommandsList(commandName);
+    }
+
+    public void RemoveCommandsList(IList<string> commandName)
+    {
+        for (int i = 0; i < commandName.Count; i++)
         {
             RemoveCommand(commandName[i]);
         }
@@ -68,7 +72,7 @@ public class Facade
 
     public void SendMessageCommand(string message, object body = null)
     {
-        m_controller.ExecuteCommand(new Message(message, body));
+        controller.ExecuteCommand(new Message(message, body));
     }
 
     /// <summary>
@@ -76,9 +80,9 @@ public class Facade
     /// </summary>
     public void AddManager(string typeName, object obj)
     {
-        if (!m_Managers.ContainsKey(typeName))
+        if (!Managers.ContainsKey(typeName))
         {
-            m_Managers.Add(typeName, obj);
+            Managers.Add(typeName, obj);
         }
     }
 
@@ -88,13 +92,13 @@ public class Facade
     public T AddManager<T>(string typeName) where T : Component
     {
         object result;
-        m_Managers.TryGetValue(typeName, out result);
+        Managers.TryGetValue(typeName, out result);
         if (result != null)
         {
             return (T)result;
         }
         Component c = AppGameManager.AddComponent<T>();
-        m_Managers.Add(typeName, c);
+        Managers.Add(typeName, c);
         return default(T);
     }
 
@@ -103,12 +107,12 @@ public class Facade
     /// </summary>
     public T GetManager<T>(string typeName) where T : class
     {
-        if (!m_Managers.ContainsKey(typeName))
+        if (!Managers.ContainsKey(typeName))
         {
             return default(T);
         }
         object manager;
-        m_Managers.TryGetValue(typeName, out manager);
+        Managers.TryGetValue(typeName, out manager);
         return (T)manager;
     }
 
@@ -117,12 +121,12 @@ public class Facade
     /// </summary>
     public void RemoveManager(string typeName)
     {
-        if (!m_Managers.ContainsKey(typeName))
+        if (!Managers.ContainsKey(typeName))
         {
             return;
         }
         object manager;
-        m_Managers.TryGetValue(typeName, out manager);
+        Managers.TryGetValue(typeName, out manager);
         if (manager != null)
         {
             Type type = manager.GetType();
@@ -131,6 +135,6 @@ public class Facade
                 Object.Destroy((Component)manager);
             }
         }
-        m_Managers.Remove(typeName);
+        Managers.Remove(typeName);
     }
 }

@@ -1,42 +1,37 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public partial class MonoBased : MonoBehaviour
 {
-    private AppFacade m_Facade;
+    private AppFacade _facade;
 
     /// <summary>
     /// 注册消息
     /// </summary>
-    /// <param name="view"></param>
-    /// <param name="messages"></param>
-    protected void RegisterMessage(IView view, List<string> messages)
+    protected void RegisterMessage(IView view, IList<string> messages)
     {
         if (messages == null || messages.Count == 0) return;
-        Controller.Instance.RegisterViewCommand(view, messages.ToArray());
+        Controller.Instance.RegisterViewCommand(view, messages);
     }
 
     /// <summary>
     /// 移除消息
     /// </summary>
-    /// <param name="view"></param>
-    /// <param name="messages"></param>
-    protected void RemoveMessage(IView view, List<string> messages)
+    protected void RemoveMessage(IView view, IList<string> messages)
     {
         if (messages == null || messages.Count == 0) return;
-        Controller.Instance.RemoveViewCommand(view, messages.ToArray());
+        Controller.Instance.RemoveViewCommand(view, messages);
     }
 
     protected AppFacade facade
     {
         get
         {
-            if (m_Facade == null)
+            if (_facade == null)
             {
-                m_Facade = AppFacade.Instance;
+                _facade = AppFacade.Instance;
             }
-            return m_Facade;
+            return _facade;
         }
     }
 
