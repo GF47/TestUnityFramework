@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public partial class StartUpCommand
 {
@@ -16,7 +14,7 @@ public partial class StartUpCommand
         // AppFacade.Instance.RegisterCommand(NotiConst.DISPATCH_MESSAGE, typeof(SocketCommand));
 
         // //-----------------初始化管理器-----------------------
-        // AppFacade.Instance.AddManager<LuaManager>(ManagerName.Lua);
+        AppFacade.Instance.AddManager<GameManager>(ManagerName.GAME_MANAGER);
         // AppFacade.Instance.AddManager<PanelManager>(ManagerName.Panel);
         // AppFacade.Instance.AddManager<SoundManager>(ManagerName.Sound);
         // AppFacade.Instance.AddManager<TimerManager>(ManagerName.Timer);

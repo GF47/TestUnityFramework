@@ -6,8 +6,8 @@ public class Controller : IController
     protected IDictionary<string, Type> commandMap;
     protected IDictionary<IView, List<string>> viewCommandMap;
 
-    protected static volatile IController instance;
     protected readonly object syncLocker = new object();
+
     protected static readonly object StaticSyncLocker = new object();
 
     public static IController Instance
@@ -29,6 +29,7 @@ public class Controller : IController
             return instance;
         }
     }
+    protected static volatile IController instance;
 
     protected virtual void InitializeController()
     {
@@ -80,7 +81,8 @@ public class Controller : IController
     {
         lock (syncLocker)
         {
-            commandMap[commandName] = commandType;
+            if (commandName.Contains(commandName)) { commandMap[commandName] = commandType; }
+            else { commandMap.Add(commandName, commandType); }
         }
     }
 

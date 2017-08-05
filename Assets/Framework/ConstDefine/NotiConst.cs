@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public partial class NotiConst
+﻿public partial class NotiConst
 {
     /// <summary>
     /// Controller层消息通知
