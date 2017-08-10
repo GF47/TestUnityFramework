@@ -53,9 +53,9 @@ namespace Assets
 
         private List<ABDownLoader> _downLoaders;
 
-
-        public void Init()
+        public ABUpdater()
         {
+            AssetBundlesManager.ConstructFunc = () => new AssetBundlesManager();
             Coroutines.StartACoroutine(__Init());
         }
 

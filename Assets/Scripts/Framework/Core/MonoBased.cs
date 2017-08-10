@@ -6,11 +6,16 @@
  * @Edit            : none
  **************************************************************/
 
+using Assets;
+
 public partial class MonoBased
 {
     /***************************************************************
      * 自己添加的继承自IManager的管理类
      **************************************************************/
+
+    private AssetBundlesManager _abManager;
+
     // private LuaManager m_LuaMgr;
     // private ResourceManager m_ResMgr;
     // private NetworkManager m_NetMgr;
@@ -22,6 +27,20 @@ public partial class MonoBased
     /***************************************************************
      * 子类的访问接口
      **************************************************************/
+
+    protected AssetBundlesManager ABManager
+    {
+        get
+        {
+            if (_abManager == null)
+            {
+                _abManager = facade.GetManager<AssetBundlesManager>(ManagerName.ASSET_BUNDLES_MANAGER);
+            }
+            return _abManager;
+        }
+    }
+
+
     /*
     protected LuaManager LuaManager {
         get {

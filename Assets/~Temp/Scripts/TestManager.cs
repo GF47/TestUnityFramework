@@ -1,7 +1,7 @@
 ﻿/***************************************************************
- * @File Name       : GameManager
+ * @File Name       : TestManager
  * @Author          : GF47
- * @Description     : TODO what's the use of the [GameManager]
+ * @Description     : TODO what's the use of the [TestManager]
  * @Date            : 2017/8/5/星期六 10:50:07
  * @Edit            : none
  **************************************************************/
@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : Manager
+public class TestManager : Manager
 {
     void Start()
     {
@@ -27,7 +27,7 @@ public class GameManager : Manager
     {
         if (Input.GetMouseButtonUp(0))
         {
-            AppFacade.Instance.SendMessageCommand(NotiConst.CUBE_RED);
+            AppFacade.Instance.SendMessageCommand(NotiConst.CUBE_RED, Color.black);
         }
         if (Input.GetMouseButtonUp(1))
         {

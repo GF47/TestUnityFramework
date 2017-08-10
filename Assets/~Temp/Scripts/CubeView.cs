@@ -26,7 +26,7 @@ public class CubeView : View
         switch (msgName)
         {
             case NotiConst.CUBE_RED:
-                _mat.color = Color.red;
+                _mat.color = (Color)msgBody;
                 break;
             case NotiConst.CUBE_BLUE:
                 _mat.color = Color.blue;

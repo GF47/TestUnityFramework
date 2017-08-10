@@ -1,4 +1,4 @@
 ﻿public static partial class ManagerName
 {
-    public const string GAME_MANAGER = "GameManager";
+    public const string TEST_MANAGER = "TestManager";
 }

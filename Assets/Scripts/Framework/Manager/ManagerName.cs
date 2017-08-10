@@ -8,5 +8,5 @@
 
 public partial class ManagerName
 {
-    
+    public const string ASSET_BUNDLES_MANAGER = "AssetBundlesManager";
 } 
