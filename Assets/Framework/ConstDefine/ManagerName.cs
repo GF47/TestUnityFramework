@@ -1,7 +1,7 @@
 ﻿/***************************************************************
  * @File Name       : ManagerName
  * @Author          : GF47
- * @Description     : TODO what's the use of the [ManagerName]
+ * @Description     : 管理器名称定义
  * @Date            : 2017/8/5/星期六 10:54:12
  * @Edit            : none
  **************************************************************/

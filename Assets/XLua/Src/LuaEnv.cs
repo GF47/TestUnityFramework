@@ -46,7 +46,15 @@ namespace XLua
         internal int errorFuncRef = -1;
 
 #if THREAD_SAFE || HOTFIX_ENABLE
-        internal object luaEnvLock = new object();
+        internal static object luaLock = new object();
+
+        internal object luaEnvLock
+        {
+            get
+            {
+                return luaLock;
+            }
+        }
 #endif
 
         const int LIB_VERSION_EXPECT = 102;
@@ -70,7 +78,7 @@ namespace XLua
                 // Create State
                 rawL = LuaAPI.luaL_newstate();
 
-                //Init MonoBased Libs
+                //Init Base Libs
                 LuaAPI.luaopen_xlua(rawL);
                 LuaAPI.luaopen_i64lib(rawL);
                 LuaAPI.luaopen_perflib(rawL);

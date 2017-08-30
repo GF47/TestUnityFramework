@@ -1,7 +1,8 @@
 ﻿/***************************************************************
  * @File Name       : FileUtility
  * @Author          : GF47
- * @Description     : TODO what's the use of the [FileUtility]
+ * @Description     : 文件工具
+ * 当前包含获取文件的md5值
  * @Date            : 2017/8/1/星期二 11:50:56
  * @Edit            : none
  **************************************************************/
@@ -30,7 +31,7 @@ namespace GF47RunTime
                 fileMD5 = "";
                 for (int i = 0; i < result.Length; i++)
                 {
-                    fileMD5 += Convert.ToString(result[i], 16);
+                    fileMD5 += System.Convert.ToString(result[i], 16);
                 }
             }
             catch (Exception e)

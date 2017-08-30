@@ -1,7 +1,7 @@
 ﻿/***************************************************************
  * @File Name       : ABUpdater
  * @Author          : GF47
- * @Description     : TODO what's the use of the [ABUpdater]
+ * @Description     : 更新ab包，只需要new一下然后等待yield就行
  * @Date            : 2017/8/1/星期二 11:11:10
  * @Edit            : none
  **************************************************************/
@@ -24,6 +24,7 @@ namespace Assets
                 if (_isUpdateFinished) { return 100; }
 
                 if (_downLoaders == null) { return 0; }
+                if (_downLoaders.Count == 0) { return 100; }
 
                 int value = 0;
                 for (int i = 0; i < _downLoaders.Count; i++)

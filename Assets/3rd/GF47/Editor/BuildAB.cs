@@ -74,11 +74,16 @@ public class BuildAB
 
     private static void SetSingleABName(Object obj)
     {
-        if (ProjectWindowUtil.IsFolder(obj.GetInstanceID())) return;
-        if (obj is MonoScript) return;
+        if (ProjectWindowUtil.IsFolder(obj.GetInstanceID())) return;    // 1、asset是文件夹，不设置name
+        if (obj is MonoScript) return;                                  // 2、asset是脚本，不设置name
+
+        string path = AssetDatabase.GetAssetPath(obj);
+        if (path.EndsWith(".dll")) return;                              // 3、asset是dll，不设置name
+
+        AssetImporter importer = AssetImporter.GetAtPath(path);
+        if (!string.IsNullOrEmpty(importer.assetBundleName)) return;    // 4、asset已经有了name，不设置name
 
         string assetbundleName, guid;
-        string path = AssetDatabase.GetAssetPath(obj);
 
         if (path.Contains(CHAR_COLLECT_SUBASSETS_TO_SINGLE_ASSETBUNDLE)) // 带有指定字符开头的目录下的资源被打成一个包，包名为目录名
         {
@@ -102,7 +107,6 @@ public class BuildAB
 
         assetbundleName = string.Format("{0}_{1}", assetbundleName, guid); // 添加guid前几位，避免命名冲突
         assetbundleName = Regex.Replace(assetbundleName, "_"); // 去除路径中的非法字符
-        AssetImporter importer = AssetImporter.GetAtPath(path);
         importer.assetBundleName = assetbundleName;
     }
 
@@ -192,6 +196,25 @@ public class BuildAB
     /// <returns>输出目录</returns>
     private static string CreateABDirectory(Platform platform, string exportDirectory = null)
     {
+        string platformDir = GetPlatformName(platform);
+
+        if (string.IsNullOrEmpty(exportDirectory)) // 没有指定导出位置，则生成位置为 StreamingAssets 内
+        {
+            if (!Directory.Exists(Application.streamingAssetsPath)) { Directory.CreateDirectory(Application.streamingAssetsPath); }
+            exportDirectory = string.Format("{0}/{1}", Application.streamingAssetsPath, platformDir);
+            if (!Directory.Exists(exportDirectory)) { Directory.CreateDirectory(exportDirectory); }
+        }
+        else // 生成位置为指定目录
+        {
+            exportDirectory = string.Format("{0}/{1}", exportDirectory, platformDir);
+            if (!Directory.Exists(exportDirectory)) { Directory.CreateDirectory(exportDirectory); }
+        }
+
+        return exportDirectory;
+    }
+
+    private static string GetPlatformName(Platform platform)
+    {
         string platformDir = string.Empty;
         switch (platform)
         {
@@ -211,20 +234,7 @@ public class BuildAB
                 break;
         }
 
-        bool isExternal = !string.IsNullOrEmpty(exportDirectory);
-        if (isExternal)
-        {
-            exportDirectory = string.Format("{0}/{1}", exportDirectory, platformDir);
-            if (!Directory.Exists(exportDirectory)) { Directory.CreateDirectory(exportDirectory); }
-        }
-        else
-        {
-            if (!Directory.Exists(Application.streamingAssetsPath)) { Directory.CreateDirectory(Application.streamingAssetsPath); }
-            exportDirectory = string.Format("{0}/{1}", Application.streamingAssetsPath, platformDir);
-            if (!Directory.Exists(exportDirectory)) { Directory.CreateDirectory(exportDirectory); }
-        }
-
-        return exportDirectory;
+        return platformDir;
     }
 
     // [MenuItem("AssetBundles/Create Assets Map")]
@@ -308,4 +318,45 @@ public class BuildAB
         }
     }
 
+    [MenuItem("AssetBundles/Clean AssetBundles Name")]
+    private static void CleanABName()
+    {
+        string[] assetbundleNames = AssetDatabase.GetAllAssetBundleNames();
+        for (int i = 0; i < assetbundleNames.Length; i++)
+        {
+            AssetDatabase.RemoveAssetBundleName(assetbundleNames[i], true);
+        }
+        // for (int i = 0; i < assetbundleNames.Length; i++)
+        // {
+        //     string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(assetbundleNames[i]);
+        //     for (int j = 0; j < assetPaths.Length; j++)
+        //     {
+        //         AssetImporter ai = AssetImporter.GetAtPath(assetPaths[j]);
+        //         ai.assetBundleName = string.Empty;
+        //         ai.assetBundleVariant = string.Empty;
+        //     }
+        // }
+        // AssetDatabase.RemoveUnusedAssetBundleNames();
+    }
+
+    /// <summary>
+    /// 删除旧的AB包，包括缓存中的
+    /// </summary>
+    [MenuItem("AssetBundles/Clean Cache")]
+    private static void CleanCache()
+    {
+        Caching.CleanCache();
+    }
+
+    /// <summary>
+    /// 清理 StreamingAssets 目录
+    /// </summary>
+    [MenuItem("AssetBundles/Clean StreamingAssets")]
+    private static void CleanStreamingAssets()
+    {
+        if (Directory.Exists(Application.streamingAssetsPath))
+        {
+            Directory.Delete(Application.streamingAssetsPath, true);
+        }
+    }
 }

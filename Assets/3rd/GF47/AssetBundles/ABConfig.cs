@@ -4,7 +4,6 @@ namespace Assets
 {
     public static class ABConfig
     {
-
         /// <summary>
         /// 运行平台
         /// </summary>
@@ -18,7 +17,7 @@ namespace Assets
 #endif
 
         public const string KEY_SERVER = "Server";
-        public const string SERVER_URL = "http://172.16.33.112:8088";
+        public const string SERVER_URL = "http://172.16.33.116:8088";
 
         public const string KEY_VERSION = "Version";
         public const int VERSION = 1;

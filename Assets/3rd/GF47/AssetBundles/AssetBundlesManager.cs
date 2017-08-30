@@ -1,7 +1,7 @@
 ﻿/***************************************************************
  * @File Name       : AssetBundlesManager
  * @Author          : GF47
- * @Description     : TODO what's the use of the [AssetBundlesManager]
+ * @Description     : ab包管理器，平时使用时需要 BeginLoadABContain()，使用完毕之后 调用 EndLoad()，true表示保留对这个ab包的引用，false表示用完ab包之后随即卸载
  * @Date            : 2017/8/1/星期二 10:59:55
  * @Edit            : none
  **************************************************************/
@@ -43,7 +43,7 @@ namespace Assets
 
         public ABItem BeginLoadABContain(string assetName)
         {
-            _assetBundlesTemp.Clear();
+            // _assetBundlesTemp.Clear();
 
             string abName = GetABNameByAssetName(assetName);
 
@@ -81,7 +81,7 @@ namespace Assets
                 ABItem item = _assetBundlesTemp[i];
                 if (item.referenceCount < 1)
                 {
-                    item.ab.Unload(force);
+                    if (item.ab != null) item.ab.Unload(force);
                 }
             }
             _assetBundles.RemoveAll(abItem => abItem.referenceCount < 1);

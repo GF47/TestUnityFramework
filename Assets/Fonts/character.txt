@@ -1,0 +1,23 @@
+0123456789
+qwertyuiopasdfghjklzxcvbnm
+[  ](  )<  >
+QWERTYUIOPASDFGHJKLZXCVBNM
+平原
+盆地
+山地
+丘陵
+高原
+峡谷
+
+太阳
+月亮
+水星
+金星
+地球
+火星
+木星
+土星
+天王星
+海王星
+冥王星
+小行星带

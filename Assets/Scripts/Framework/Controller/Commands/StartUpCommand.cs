@@ -23,6 +23,8 @@ public partial class StartUpCommand
 
     void InitManager()
     {
+
+        AssetBundlesManager.Instance.Init();
         AppFacade.Instance.AddManager(ManagerName.ASSET_BUNDLES_MANAGER, AssetBundlesManager.Instance);
 
         // //-----------------初始化管理器-----------------------
